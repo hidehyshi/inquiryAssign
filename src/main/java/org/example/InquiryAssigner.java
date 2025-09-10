@@ -37,6 +37,10 @@ public class InquiryAssigner implements RequestHandler<Object, String> {
             System.out.println("MEMBERS環境変数が設定されていません");
             return "MEMBERS環境変数が設定されていません";
         }
+        String groupMention = System.getenv("GROUP_MENTION");
+        if (groupMention == null) {
+            groupMention = "";
+        }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/M/d");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
@@ -45,7 +49,11 @@ public class InquiryAssigner implements RequestHandler<Object, String> {
         Member member = assign(startDate, members);
         System.out.println("問い合わせ担当者は: " + member.name());
         try {
-            sendMessage("今日の問い合わせ担当者は " + member.toString() + " です。", webhookUrl);
+            String message = "問い合わせ担当者は " + member.toString() + " です。";
+            if (!groupMention.isBlank()) {
+                message = groupMention + " 問い合わせ担当者は " + member.toString() + " です。";
+            }
+            sendMessage(message, webhookUrl);
         } catch (Exception e) {
             e.printStackTrace();
         }
